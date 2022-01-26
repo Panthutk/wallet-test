@@ -8,6 +8,21 @@ CURRENCY = "Baht"
 CURRENCY2 = "Ringgit"
 
 
+class BogusCash(Cash):
+    """Bogus Cash allows value to be zero or negative."""
+    def __init__(self, value, currency):
+        self._value = value
+        self._currency = currency
+
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def currency(self):
+        return self._currency
+
+
 class WalletTest(unittest.TestCase):
 
     def setUp(self):
@@ -41,8 +56,6 @@ class WalletTest(unittest.TestCase):
         self.wallet.deposit(item1, item2, item3)
         self.assertListEqual([item1,item2,item3], self.wallet.get_items())
 
-        # these cases should fail
-        # deposit may raise ValueError (value <= 0) or TypeError (not Cash)
         wallet = Wallet()
         with self.assertRaises((ValueError,TypeError)):
             wallet.deposit(baditem, item1, item2)
@@ -60,6 +73,19 @@ class WalletTest(unittest.TestCase):
             wallet.deposit(item1, baditem, item2)
         # should not deposit any of them
         self.assertEqual([], wallet.get_items())
+
+    def test_cannot_deposit_zero_value(self):
+        """Should not be able to deposit Cash with zero value."""
+        wallet = Wallet()
+        with self.assertRaises(ValueError):
+            bogus = BogusCash(0, "Baht")
+            wallet.deposit(bogus)
+
+    def test_can_deposit_new_kind_of_cash(self):
+        """Wallet should accept any kind of cash, not just Coin and Banknote."""
+        wallet = Wallet()
+        bogo = BogusCash(1, "Baht")
+        wallet.deposit(bogo)
 
     def test_balance_one_currency(self):
         """Test balance after deposits of a single currency."""

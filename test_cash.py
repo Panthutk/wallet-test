@@ -16,6 +16,17 @@ class CoinTest(unittest.TestCase):
         self.assertIsInstance(c, Money)
         self.assertNotIsInstance(c, Banknote)
 
+    def test_coin_with_fractional_value(self):
+        """Coin may have a value less than one, e.g. 0.01, 0.25, or 2.5."""
+        c = Coin(0.01, "Baht")
+        self.assertEqual(0.01, c.value)
+        # weird, but spec doesn't forbid this
+        c = Coin(2.50, "Baht")
+        self.assertEqual(2.50, c.value)
+        # there should be no minimum
+        c = Coin(0.000001, "Bitcoin")
+        self.assertEqual(0.000001, c.value)
+
     def test_coin_has_year(self):
         """Coin has a year property that is the year minted."""
         c = Coin(5, "Ringgit")
