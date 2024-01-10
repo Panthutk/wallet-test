@@ -1,14 +1,15 @@
+"""Unit tests of Wallet."""
 import unittest
 from wallet import Wallet
 from cash import *
-# do we need to import Money?  It should be either imported or defined in cash.py.
+# do we need to import Money?  It should be imported in cash.py.
 
 # default currency
 CURRENCY = "Baht"
 CURRENCY2 = "Ringgit"
 
 
-class BogusCash(Cash):
+class BogusCash(Money):
     """Bogus Cash allows value to be zero or negative."""
     def __init__(self, value, currency):
         self._value = value
@@ -31,9 +32,9 @@ class WalletTest(unittest.TestCase):
     def test_wallet_constructor(self):
         """A new Wallet should be empty."""
         self.assertTrue(self.wallet.is_empty())
-        self.assertEqual(0, len(self.wallet.get_items()))
+        self.assertListEqual([], self.wallet.get_items())
     
-    def test_zero_value_wallet(self):
+    def test_new_wallzero_value_wallet(self):
         """Value of a new wallet should be Money(0,currency), not 0 (float)."""
         self.assertEqual(Money(0, CURRENCY), self.wallet.balance(CURRENCY))
 
@@ -136,9 +137,11 @@ class WalletTest(unittest.TestCase):
         self.wallet = Wallet()
         self.deposit_and_withdraw([1, 25, 10, 5], 36, succeeds=True)
 
-        # some withdraws that should fail
+    def test_impossible_withdraw_single_currency(self):
+        """Withdraw some values that are not possible, using single currency."""
         self.wallet = Wallet()
-        self.assertIsNone(self.wallet.withdraw(Money(1, CURRENCY)))
+        self.assertIsNone(self.wallet.withdraw(Money(1, CURRENCY)), 
+                          f"withdraw 1 {CURRENCY} from empty wallet" )
         self.deposit_and_withdraw([10,10,10], 25, succeeds=False)
         # wallet already contains [10,10,10]
         self.deposit_and_withdraw([2,2,2], 35, succeeds=False)
@@ -157,6 +160,7 @@ class WalletTest(unittest.TestCase):
         self.deposit_and_withdraw([10], 20, succeeds=False)
 
     def deposit_and_withdraw(self, deposit_amounts, withdraw_amount, succeeds=True):
+        # save the value of wallet for later comparison
         balance_value = self.wallet.balance(CURRENCY).value
         for amount in deposit_amounts:
             self.wallet.deposit(make_cash(amount, CURRENCY))

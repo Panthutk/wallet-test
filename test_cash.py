@@ -1,18 +1,16 @@
-"""Tests of Cash, Coin, and Banknote"""
-import re
+"""Tests of Coin and Banknote"""
 import unittest
 import datetime
-from cash import *
-# Money should already be imported (in cash), but protect against unusual code
+from cash import Coin, Banknote
+# Money should already be imported (from cash), but protect against unusual code
 from money import Money
 
 
 class CoinTest(unittest.TestCase):
 
-    def test_coin_is_cash(self):
-        """Coin is a kind of Cash and Money, but not a Banknote."""
+    def test_coin_is_money(self):
+        """Coin is a kind of Money, but not a Banknote."""
         c = Coin(1, "Baht")
-        self.assertIsInstance(c, Cash)
         self.assertIsInstance(c, Money)
         self.assertNotIsInstance(c, Banknote)
 
@@ -28,34 +26,29 @@ class CoinTest(unittest.TestCase):
         self.assertEqual(0.000001, c.value)
 
     def test_coin_has_year(self):
-        """Coin has a year property that is the year minted."""
+        """Coin has a year property that is the year minted (i.e. created)."""
         c = Coin(5, "Ringgit")
         year = datetime.date.today().year
         self.assertEqual(year, c.year)
     
     def test_coin_year_is_readonly(self):
-        """Year is readonly property."""
+        """Year should be a readonly property."""
         c = Coin(5, "Baht")
         with self.assertRaises(AttributeError):
             c.year = 2000
 
     def test_coin_has_positive_value(self):
-        """Constructor should not allow non-positive values."""
+        """Coin constructor should not allow non-positive values."""
         for value in [0, -0.5, -1, -10]:
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     c = Coin(value, "Ringgit")
 
-    def test_coin_must_have_currency(self):
-        """Coin must have a non-empty string currency."""
-        with self.assertRaises(ValueError):
-            c = Coin(5, "")
-    
     def test_add_returns_money(self):
-        """You can add cash, but the result is Money not Cash."""
+        """You can add Coins, but the result is Money not Coin."""
         result = Coin(5, "Baht") + Coin(10, "Baht")
         self.assertIsInstance(result, Money)
-        self.assertNotIsInstance(result, Coin, "Result of cash+cash should be Money")
+        self.assertNotIsInstance(result, Coin, "Result of coin+coin should be Money")
         self.assertEqual(15, result.value)
         self.assertEqual("Baht", result.currency)
 
@@ -73,13 +66,11 @@ class CoinTest(unittest.TestCase):
                 self.assertEqual(result, result2)
 
 
-
 class BanknoteTest(unittest.TestCase):
 
-    def test_banknote_is_cash(self):
-        """Banknote is a kind of Cash and Money, but not a Coin."""
+    def test_banknote_is_money(self):
+        """Banknote is a kind of Money, but not a Coin."""
         c = Banknote(100, "Baht")
-        self.assertIsInstance(c, Cash)
         self.assertIsInstance(c, Money)
         self.assertNotIsInstance(c, Coin)
 
@@ -90,7 +81,7 @@ class BanknoteTest(unittest.TestCase):
         self.assertEqual(year, c.year)
     
     def test_banknote_year_is_readonly(self):
-        """Year is readonly property."""
+        """Year should be a readonly property."""
         c = Banknote(100, "Baht")
         with self.assertRaises(AttributeError):
             c.year = 2000
@@ -102,9 +93,19 @@ class BanknoteTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     c = Banknote(value, "Ringgit")
 
-    def test_banknote_disallows_weird_values(self):
-        """Banknotes don't have decimal (1.5) or weird values(7)."""
-        for value in [0.5, 10.5, 7, 1000.5]:
+    def test_banknote_valid_values(self):
+        """Value can by any 1, 2, or 5 x power of 10."""
+        # these should all succeed
+        for multiple in (1, 2, 5):
+            for base in (1, 10, 100, 1000, 1000000):
+                value = multiple*base
+                note = Banknote(value, "Eth")
+                self.assertEqual(value, note.value, 
+							f"Banknote({value},'Eth') has value {note.value}")
+
+    def test_banknote_invalid_values(self):
+        """Banknotes cannot have arbitrary values."""
+        for value in [0.5, 3, 10.5, 4000, 9000000]:
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     banknote = Banknote(value, "Ringgit")
