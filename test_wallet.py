@@ -1,7 +1,7 @@
 """Unit tests of Wallet."""
 import unittest
 from wallet import Wallet
-from cash import *
+from tests.cash import *
 # do we need to import Money?  It should be imported in cash.py.
 
 # default currency
@@ -11,6 +11,7 @@ CURRENCY2 = "Ringgit"
 
 class BogusCash(Money):
     """Bogus Cash allows value to be zero or negative."""
+
     def __init__(self, value, currency):
         self._value = value
         self._currency = currency
@@ -33,7 +34,7 @@ class WalletTest(unittest.TestCase):
         """A new Wallet should be empty."""
         self.assertTrue(self.wallet.is_empty())
         self.assertListEqual([], self.wallet.get_items())
-    
+
     def test_new_wallzero_value_wallet(self):
         """Value of a new wallet should be Money(0,currency), not 0 (float)."""
         self.assertEqual(Money(0, CURRENCY), self.wallet.balance(CURRENCY))
@@ -55,22 +56,22 @@ class WalletTest(unittest.TestCase):
         # valid deposit
         self.assertListEqual([], self.wallet.get_items())
         self.wallet.deposit(item1, item2, item3)
-        self.assertListEqual([item1,item2,item3], self.wallet.get_items())
+        self.assertListEqual([item1, item2, item3], self.wallet.get_items())
 
         wallet = Wallet()
-        with self.assertRaises((ValueError,TypeError)):
+        with self.assertRaises((ValueError, TypeError)):
             wallet.deposit(baditem, item1, item2)
         # should not deposit any of them
         self.assertEqual([], wallet.get_items())
 
         wallet = Wallet()
-        with self.assertRaises((ValueError,TypeError)):
+        with self.assertRaises((ValueError, TypeError)):
             wallet.deposit(item1, item2, item3, baditem)
         # should not deposit any of them
         self.assertEqual([], wallet.get_items())
 
         wallet = Wallet()
-        with self.assertRaises((ValueError,TypeError)):
+        with self.assertRaises((ValueError, TypeError)):
             wallet.deposit(item1, baditem, item2)
         # should not deposit any of them
         self.assertEqual([], wallet.get_items())
@@ -140,11 +141,11 @@ class WalletTest(unittest.TestCase):
     def test_impossible_withdraw_single_currency(self):
         """Withdraw some values that are not possible, using single currency."""
         self.wallet = Wallet()
-        self.assertIsNone(self.wallet.withdraw(Money(1, CURRENCY)), 
-                          f"withdraw 1 {CURRENCY} from empty wallet" )
-        self.deposit_and_withdraw([10,10,10], 25, succeeds=False)
+        self.assertIsNone(self.wallet.withdraw(Money(1, CURRENCY)),
+                          f"withdraw 1 {CURRENCY} from empty wallet")
+        self.deposit_and_withdraw([10, 10, 10], 25, succeeds=False)
         # wallet already contains [10,10,10]
-        self.deposit_and_withdraw([2,2,2], 35, succeeds=False)
+        self.deposit_and_withdraw([2, 2, 2], 35, succeeds=False)
 
     def test_withdraw_multiple_currency(self):
         """withdraw when items have different currencies."""
@@ -176,20 +177,21 @@ class WalletTest(unittest.TestCase):
                              f"Withdrew {withdraw_money} but got "+str(withdrawn))
             for item in withdrawn:
                 self.assertEqual(CURRENCY, item.currency,
-                        f"Withdrew {withdraw_money} but got {item} (wrong currency)")
+                                 f"Withdrew {withdraw_money} but got {item} (wrong currency)")
             # balance should be reduced by the amount withdrawn, of course
             # compare the value (instead of compare as Money) to avoid depending
             # on Money.__add__
             self.assertEqual(balance_value-withdraw_amount, newbalance.value)
         else:
-            self.assertIsNone(withdrawn, f"withdraw({withdraw_money} should have failed")
+            self.assertIsNone(
+                withdrawn, f"withdraw({withdraw_money} should have failed")
             # balance should not have changed
             self.assertEqual(balance_value, newbalance.value)
         return withdrawn
 
 
 def make_cash(amount, currency) -> Cash:
-    if amount%100 == 0:
+    if amount % 100 == 0:
         return Banknote(amount, currency)
     else:
         return Coin(amount, currency)

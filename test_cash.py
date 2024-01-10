@@ -30,7 +30,7 @@ class CoinTest(unittest.TestCase):
         c = Coin(5, "Ringgit")
         year = datetime.date.today().year
         self.assertEqual(year, c.year)
-    
+
     def test_coin_year_is_readonly(self):
         """Year should be a readonly property."""
         c = Coin(5, "Baht")
@@ -48,17 +48,19 @@ class CoinTest(unittest.TestCase):
         """You can add Coins, but the result is Money not Coin."""
         result = Coin(5, "Baht") + Coin(10, "Baht")
         self.assertIsInstance(result, Money)
-        self.assertNotIsInstance(result, Coin, "Result of coin+coin should be Money")
+        self.assertNotIsInstance(
+            result, Coin, "Result of coin+coin should be Money")
         self.assertEqual(15, result.value)
         self.assertEqual("Baht", result.currency)
 
     def test_add_coin_and_money(self):
         """You can add coin and money. The result is Money (not Coin)."""
-        for (value1, value2, sum_value) in [(1,-1,0), (5,0,5), (10,-4, 6)]:
+        for (value1, value2, sum_value) in [(1, -1, 0), (5, 0, 5), (10, -4, 6)]:
             with self.subTest(coin_value=value1, money_value=value2, sum_value=sum_value):
                 result = Coin(value1, "Baht") + Money(value2, "Baht")
                 self.assertIsInstance(result, Money)
-                self.assertNotIsInstance(result, Coin, "Result of cash+cash should be Money")
+                self.assertNotIsInstance(
+                    result, Coin, "Result of cash+cash should be Money")
                 self.assertEqual(sum_value, result.value)
                 # try adding in opposite order
                 result2 = Money(value2, "Baht") + Coin(value1, "Baht")
@@ -79,7 +81,7 @@ class BanknoteTest(unittest.TestCase):
         c = Banknote(100, "Ringgit")
         year = datetime.date.today().year
         self.assertEqual(year, c.year)
-    
+
     def test_banknote_year_is_readonly(self):
         """Year should be a readonly property."""
         c = Banknote(100, "Baht")
@@ -100,8 +102,8 @@ class BanknoteTest(unittest.TestCase):
             for base in (1, 10, 100, 1000, 1000000):
                 value = multiple*base
                 note = Banknote(value, "Eth")
-                self.assertEqual(value, note.value, 
-							f"Banknote({value},'Eth') has value {note.value}")
+                self.assertEqual(value, note.value,
+                                 f"Banknote({value},'Eth') has value {note.value}")
 
     def test_banknote_invalid_values(self):
         """Banknotes cannot have arbitrary values."""
@@ -114,22 +116,24 @@ class BanknoteTest(unittest.TestCase):
         """Banknote must have a non-empty string currency."""
         with self.assertRaises(ValueError):
             c = Banknote(100, "")
-    
+
     def test_add_returns_money(self):
         """You can add cash, but the result is Money not Cash."""
         result = Banknote(50, "Baht") + Banknote(10, "Baht")
         self.assertIsInstance(result, Money)
-        self.assertNotIsInstance(result, Banknote, "Result of cash+cash should be Money")
+        self.assertNotIsInstance(
+            result, Banknote, "Result of cash+cash should be Money")
         self.assertEqual(60, result.value)
         self.assertEqual("Baht", result.currency)
 
     def test_add_banknote_and_money(self):
         """You can add banknote and money. The result is Money (not Banknote)."""
-        for (value1, value2, sum_value) in [(100,-100,0), (500,0,500), (100,-40, 60)]:
+        for (value1, value2, sum_value) in [(100, -100, 0), (500, 0, 500), (100, -40, 60)]:
             with self.subTest(banknote_value=value1, money_value=value2, sum_value=sum_value):
                 result = Banknote(value1, "Baht") + Money(value2, "Baht")
                 self.assertIsInstance(result, Money)
-                self.assertNotIsInstance(result, Banknote, "Result of cash+cash should be Money")
+                self.assertNotIsInstance(
+                    result, Banknote, "Result of cash+cash should be Money")
                 self.assertEqual(sum_value, result.value)
                 # try adding in opposite order
                 result2 = Money(value2, "Baht") + Banknote(value1, "Baht")
