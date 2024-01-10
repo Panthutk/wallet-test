@@ -1,7 +1,7 @@
 """Unit tests of Wallet."""
 import unittest
 from wallet import Wallet
-from tests.cash import *
+from cash import *
 # do we need to import Money?  It should be imported in cash.py.
 
 # default currency
