@@ -34,7 +34,7 @@ class WalletTest(unittest.TestCase):
         self.assertTrue(self.wallet.is_empty())
         self.assertListEqual([], self.wallet.get_items())
     
-    def test_new_wallzero_value_wallet(self):
+    def test_new_wallet_zero_value(self):
         """Value of a new wallet should be Money(0,currency), not 0 (float)."""
         self.assertEqual(Money(0, CURRENCY), self.wallet.balance(CURRENCY))
 
@@ -188,7 +188,8 @@ class WalletTest(unittest.TestCase):
         return withdrawn
 
 
-def make_cash(amount, currency) -> Cash:
+def make_cash(amount, currency):
+    """Utility function to create various money objects."""
     if amount%100 == 0:
         return Banknote(amount, currency)
     else:
